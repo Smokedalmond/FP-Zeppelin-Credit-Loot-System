@@ -1,26 +1,26 @@
 local Frame = nil
 local ItemsFrame = nil
 
-local currentLootIDs = IBRaidLootData["currentLootIDs"]
-local currentLoot = IBRaidLootData["currentLoot"]
-local RollTypes = IBRaidLootSettings["RollTypes"]
-local RollTypeList = IBRaidLootSettings["RollTypeList"]
+local currentLootIDs = FPLiftData["currentLootIDs"]
+local currentLoot = FPLiftData["currentLoot"]
+local RollTypes = FPLiftSettings["RollTypes"]
+local RollTypeList = FPLiftSettings["RollTypeList"]
 
-function IBRaidLoot:CreatePendingRollsFrame()
+function FPLift:CreatePendingRollsFrame()
 	if Frame ~= nil then
 		Frame:Show()
 		self:UpdatePendingRollsFrame()
 		return Frame
 	end
 
-	Frame = CreateFrame("Frame", "IBRaidLoot_PendingRollsFrame", UIParent, "BasicFrameTemplateWithInset")
+	Frame = CreateFrame("Frame", "FPLift_PendingRollsFrame", UIParent, "BasicFrameTemplateWithInset")
 	Frame:SetFrameStrata("HIGH")
 	Frame:SetSize(600, 400)
 	Frame:SetPoint("CENTER", 0, 0)
 	Frame:EnableMouse(true)
 	Frame:SetMovable(true)
 
-	table.insert(UISpecialFrames, "IBRaidLoot_PendingRollsFrame")
+	table.insert(UISpecialFrames, "FPLift_PendingRollsFrame")
 	self:SetupWindowFrame(Frame)
 
 	local fTitle = Frame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
@@ -45,7 +45,7 @@ function IBRaidLoot:CreatePendingRollsFrame()
 	return Frame
 end
 
-function IBRaidLoot:CreatePendingRollsItemFrames(closeIfNoItems)
+function FPLift:CreatePendingRollsItemFrames(closeIfNoItems)
 	local hasItems = false
 	for _, lootID in pairs(currentLootIDs) do
 		local lootObj = currentLoot[lootID]
@@ -59,7 +59,7 @@ function IBRaidLoot:CreatePendingRollsItemFrames(closeIfNoItems)
 	end
 end
 
-function IBRaidLoot:CreatePendingRollsItemFrame(lootObj)
+function FPLift:CreatePendingRollsItemFrame(lootObj)
 	local i = ItemsFrame.subframeCount + 1
 	local f = ItemsFrame.subframes[i]
 
@@ -211,7 +211,7 @@ function IBRaidLoot:CreatePendingRollsItemFrame(lootObj)
 		if IsControlKeyDown() then
 			DressUpItemLink(lootObj["link"])
 		elseif IsShiftKeyDown() then
-			IBRaidLoot:InsertInChatEditbox(lootObj["link"])
+			FPLift:InsertInChatEditbox(lootObj["link"])
 		end
 	end)
 
@@ -266,23 +266,23 @@ function IBRaidLoot:CreatePendingRollsItemFrame(lootObj)
 				sendObj["lootID"] = lootObj["lootID"]
 				sendObj["type"] = rollObj["type"]
 
-				if IBRaidLoot:IsMasterLooter() then
+				if FPLift:IsMasterLooter() then
 					if RollTypes[rollObj["type"]]["shouldRoll"] then
 						rollObj["value"] = random(100)
 						sendObj["value"] = rollObj["value"]
 					end
 					sendObj["player"] = player
-					IBRaidLoot:CommMessage("RollResponse", sendObj, "RAID")
+					FPLift:CommMessage("RollResponse", sendObj, "RAID")
 				else
-					IBRaidLoot:CommMessage("Roll", sendObj, "RAID")
+					FPLift:CommMessage("Roll", sendObj, "RAID")
 				end
 
 				if ItemsFrame.subframeCount == 1 then
-					IBRaidLoot:GoToFirstUnassigned()
-					IBRaidLoot:CreateRollSummaryFrame()
+					FPLift:GoToFirstUnassigned()
+					FPLift:CreateRollSummaryFrame()
 				end
-				IBRaidLoot:UpdatePendingRollsFrame(true)
-				IBRaidLoot:UpdateRollSummaryFrameForLoot(lootObj["lootID"])
+				FPLift:UpdatePendingRollsFrame(true)
+				FPLift:UpdateRollSummaryFrameForLoot(lootObj["lootID"])
 			end)
 		end
 	end
@@ -317,14 +317,14 @@ function IBRaidLoot:CreatePendingRollsItemFrame(lootObj)
 	return f
 end
 
-function IBRaidLoot:ClearPendingRollsItemFrames()
+function FPLift:ClearPendingRollsItemFrames()
 	for _, frame in pairs(ItemsFrame.subframes) do
 		frame:Hide()
 	end
 	ItemsFrame.subframeCount = 0
 end
 
-function IBRaidLoot:UpdatePendingRollsFrame(closeIfNoItems)
+function FPLift:UpdatePendingRollsFrame(closeIfNoItems)
 	if Frame == nil or not Frame:IsVisible() then
 		return
 	end
@@ -333,7 +333,7 @@ function IBRaidLoot:UpdatePendingRollsFrame(closeIfNoItems)
 	self:CreatePendingRollsItemFrames(closeIfNoItems)
 end
 
-function IBRaidLoot:GetRollTypeButtonCount()
+function FPLift:GetRollTypeButtonCount()
 	local buttons = 0
 	for _, obj in pairs(RollTypeList) do
 		if obj["button"] then

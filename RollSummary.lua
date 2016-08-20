@@ -2,32 +2,32 @@ local Frame = nil
 local LinesFrame = nil
 local currentIndex = 1
 
-local currentLootIDs = IBRaidLootData["currentLootIDs"]
-local currentLoot = IBRaidLootData["currentLoot"]
-local RollTypes = IBRaidLootSettings["RollTypes"]
-local RollTypeList = IBRaidLootSettings["RollTypeList"]
+local currentLootIDs = FPLiftData["currentLootIDs"]
+local currentLoot = FPLiftData["currentLoot"]
+local RollTypes = FPLiftSettings["RollTypes"]
+local RollTypeList = FPLiftSettings["RollTypeList"]
 
-function IBRaidLoot:CreateRollSummaryFrame()
+function FPLift:CreateRollSummaryFrame()
 	if Frame ~= nil then
 		Frame:Show()
 		self:UpdateRollSummaryFrame()
 		return Frame
 	end
 
-	Frame = CreateFrame("Frame", "IBRaidLoot_RollSummaryFrame", UIParent, "BasicFrameTemplateWithInset")
+	Frame = CreateFrame("Frame", "FPLift_RollSummaryFrame", UIParent, "BasicFrameTemplateWithInset")
 	Frame:SetFrameStrata("HIGH")
 	Frame:SetSize(350, 400)
 	Frame:SetPoint("CENTER", 0, 0)
 	Frame:EnableMouse(true)
 	Frame:SetMovable(true)
 	Frame:SetScript("OnHide", function(self)
-		local lootObj = IBRaidLoot:GetCurrentRollSummaryLoot()
+		local lootObj = FPLift:GetCurrentRollSummaryLoot()
 		if lootObj and lootObj["pruneAt"] and GetTime() >= lootObj["pruneAt"] then
-			IBRaidLoot:RemoveLoot(lootObj)
+			FPLift:RemoveLoot(lootObj)
 		end
 	end)
 
-	table.insert(UISpecialFrames, "IBRaidLoot_PendingRollsFrame")
+	table.insert(UISpecialFrames, "FPLift_PendingRollsFrame")
 	self:SetupWindowFrame(Frame)
 
 	local fTitle = Frame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
@@ -85,7 +85,7 @@ function IBRaidLoot:CreateRollSummaryFrame()
 	fPrevButton:SetWidth(24)
 	fPrevButton:SetText("<")
 	fPrevButton:SetScript("OnClick", function(self)
-		IBRaidLoot:GoToPrevRollSummaryLoot()
+		FPLift:GoToPrevRollSummaryLoot()
 	end)
 	Frame.prevButton = fPrevButton
 
@@ -100,7 +100,7 @@ function IBRaidLoot:CreateRollSummaryFrame()
 	fNextButton:SetWidth(24)
 	fNextButton:SetText(">")
 	fNextButton:SetScript("OnClick", function(self)
-		IBRaidLoot:GoToNextRollSummaryLoot()
+		FPLift:GoToNextRollSummaryLoot()
 	end)
 	Frame.nextButton = fNextButton
 
@@ -122,18 +122,18 @@ function IBRaidLoot:CreateRollSummaryFrame()
 	fRollValueText:SetJustifyH("LEFT")
 	fRollValueText:SetText("Roll")
 
-	StaticPopupDialogs["IBRaidLoot_RollSummary_GiveLoot_Confirm"] = {
+	StaticPopupDialogs["FPLift_RollSummary_GiveLoot_Confirm"] = {
 		text = "Are you sure you want to give this item to %s?",
 		button1 = ACCEPT,
 		button2 = CANCEL,
 		OnAccept = function(self, data)
 			local rollObj = data["rollObj"]
 			local lootObj = data["lootObj"]
-			IBRaidLoot:GiveMasterLootItem(rollObj["player"], lootObj, function(msg)
+			FPLift:GiveMasterLootItem(rollObj["player"], lootObj, function(msg)
 				if msg then
-					StaticPopup_Show("IBRaidLoot_RollSummary_GiveLoot_Error", msg)
+					StaticPopup_Show("FPLift_RollSummary_GiveLoot_Error", msg)
 				else
-					if not IBRaidLoot:GoToFirstUnassigned() then
+					if not FPLift:GoToFirstUnassigned() then
 						Frame:Hide()
 					end
 				end
@@ -146,7 +146,7 @@ function IBRaidLoot:CreateRollSummaryFrame()
 		showAlert = true
 	}
 
-	StaticPopupDialogs["IBRaidLoot_RollSummary_GiveLoot_Error"] = {
+	StaticPopupDialogs["FPLift_RollSummary_GiveLoot_Error"] = {
 		text = "%s",
 		button1 = OKAY,
 		timeout = 30,
@@ -159,7 +159,7 @@ function IBRaidLoot:CreateRollSummaryFrame()
 	return Frame
 end
 
-function IBRaidLoot:UpdateRollSummaryFrameForLoot(lootID)
+function FPLift:UpdateRollSummaryFrameForLoot(lootID)
 	if Frame == nil or not Frame:IsVisible() then
 		return
 	end
@@ -174,7 +174,7 @@ function IBRaidLoot:UpdateRollSummaryFrameForLoot(lootID)
 	end
 end
 
-function IBRaidLoot:UpdateRollSummaryFrame()
+function FPLift:UpdateRollSummaryFrame()
 	if Frame == nil or not Frame:IsVisible() then
 		return
 	end
@@ -198,7 +198,7 @@ function IBRaidLoot:UpdateRollSummaryFrame()
 		if IsControlKeyDown() then
 			DressUpItemLink(lootObj["link"])
 		elseif IsShiftKeyDown() then
-			IBRaidLoot:InsertInChatEditbox(lootObj["link"])
+			FPLift:InsertInChatEditbox(lootObj["link"])
 		end
 	end)
 
@@ -245,7 +245,7 @@ function IBRaidLoot:UpdateRollSummaryFrame()
 	self:UpdateRollSummaryRollsFrame()
 end
 
-function IBRaidLoot:CreateRollSummaryRollFrames()
+function FPLift:CreateRollSummaryRollFrames()
 	local lootObj = self:GetCurrentRollSummaryLoot()
 	local rolls = self:GetSortedRolls(lootObj)
 	for _, rollObj in pairs(rolls) do
@@ -253,7 +253,7 @@ function IBRaidLoot:CreateRollSummaryRollFrames()
 	end
 end
 
-function IBRaidLoot:CreateRollSummaryRollFrame(lootObj, rollObj)
+function FPLift:CreateRollSummaryRollFrame(lootObj, rollObj)
 	local i = LinesFrame.subframeCount + 1
 	local f = LinesFrame.subframes[i]
 
@@ -320,8 +320,8 @@ function IBRaidLoot:CreateRollSummaryRollFrame(lootObj, rollObj)
 		f:SetScript("OnClick", nil)
 	else
 		f:SetScript("OnClick", function(self, button)
-			if IBRaidLoot:IsMasterLooter() then
-				local dialog = StaticPopup_Show("IBRaidLoot_RollSummary_GiveLoot_Confirm", string.gsub(rollObj["player"], "%-"..GetRealmName(), ""))
+			if FPLift:IsMasterLooter() then
+				local dialog = StaticPopup_Show("FPLift_RollSummary_GiveLoot_Confirm", string.gsub(rollObj["player"], "%-"..GetRealmName(), ""))
 				if dialog then
 					local data = {}
 					data["rollObj"] = rollObj
@@ -349,14 +349,14 @@ function IBRaidLoot:CreateRollSummaryRollFrame(lootObj, rollObj)
 	f:Show()
 end
 
-function IBRaidLoot:ClearRollSummaryRollFrames()
+function FPLift:ClearRollSummaryRollFrames()
 	for _, frame in pairs(LinesFrame.subframes) do
 		frame:Hide()
 	end
 	LinesFrame.subframeCount = 0
 end
 
-function IBRaidLoot:UpdateRollSummaryRollsFrame()
+function FPLift:UpdateRollSummaryRollsFrame()
 	if Frame == nil or not Frame:IsVisible() then
 		return
 	end
@@ -365,27 +365,27 @@ function IBRaidLoot:UpdateRollSummaryRollsFrame()
 	self:CreateRollSummaryRollFrames()
 end
 
-function IBRaidLoot:GetCurrentRollSummaryLoot()
+function FPLift:GetCurrentRollSummaryLoot()
 	currentIndex = math.max(math.min(currentIndex, #currentLootIDs), 1)
 	return currentLoot[currentLootIDs[currentIndex]]
 end
 
-function IBRaidLoot:GoToRollSummaryLoot(index)
+function FPLift:GoToRollSummaryLoot(index)
 	currentIndex = index
 	self:UpdateRollSummaryFrame()
 end
 
-function IBRaidLoot:GoToPrevRollSummaryLoot()
+function FPLift:GoToPrevRollSummaryLoot()
 	currentIndex = currentIndex - 1
 	self:UpdateRollSummaryFrame()
 end
 
-function IBRaidLoot:GoToNextRollSummaryLoot()
+function FPLift:GoToNextRollSummaryLoot()
 	currentIndex = currentIndex + 1
 	self:UpdateRollSummaryFrame()
 end
 
-function IBRaidLoot:GoToFirstUnassigned()
+function FPLift:GoToFirstUnassigned()
 	for i = 1, #currentLootIDs do
 		local lootID = currentLootIDs[i]
 		local lootObj = currentLoot[lootID]
